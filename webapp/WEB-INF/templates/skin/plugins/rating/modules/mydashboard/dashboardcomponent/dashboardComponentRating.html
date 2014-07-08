@@ -1,0 +1,28 @@
+<fieldset>
+
+<legend>#i18n{module.rating.mydashboard.mydashboardComponentRating.title}</legend>
+<#if nb_votes?has_content>
+#i18n{module.rating.mydashboard.mydashboardComponentRating.title} : ${nb_votes_user} / ${nb_votes}
+</#if>
+<br />
+<div class="row">
+	<#list list_resource_dto as resource>
+		<div class="col-sm-6 col-md-3" >
+    		<div class="thumbnail">
+	      		<div class="caption">
+	        		<b>${resource.title}</b>
+	        		<#if resource.canDelete>
+	        		<div class="cancel pull-right">
+	        			<a 
+	        			href="jsp/site/plugins/extend/modules/rating/DoCancelVote.jsp?idExtendableResource=${resource.idResource}&extendableResourceType=${resource.typeResource}" > 
+	        			</a>
+	        		</div>
+	        		</#if>
+	        		<br />
+	        		<span>${resource.vote} vote(s) / ${resource.note} point(s) </span>
+				</div>
+			</div>
+		</div>
+	</#list>
+	</div>
+</fieldset>
