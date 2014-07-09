@@ -27,4 +27,10 @@
 	<!-- Portlet parameters -->
     <portlets>
    </portlets>
+    
+    <!--  Specific plugin CSS stylesheet   --> 
+    <css-stylesheets>
+          <css-stylesheets-scope>portal</css-stylesheets-scope>
+          <css-stylesheet>module-rating-mydashboard/module-rating-mydashboard.css</css-stylesheet> 
+    </css-stylesheets>
 </plug-in>

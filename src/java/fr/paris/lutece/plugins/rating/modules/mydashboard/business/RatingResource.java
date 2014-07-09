@@ -36,6 +36,16 @@ public class RatingResource
     private String _strVote;
 
     /**
+     * The resource nb vote
+     */
+    private String _strSummary;
+
+    /**
+     * The resource nb vote
+     */
+    private String _strThumbnail;
+    
+    /**
      * @return the _lIdResource
      */
     public Long getIdResource( )
@@ -129,5 +139,37 @@ public class RatingResource
     public void setVote( String strVote )
     {
         this._strVote = strVote;
+    }
+
+    /**
+     * @return the _strSummary
+     */
+    public String getSummary( )
+    {
+        return _strSummary;
+    }
+
+    /**
+     * @param strSummary the _strSummary to set
+     */
+    public void setSummary( String strSummary )
+    {
+        this._strSummary = strSummary;
+    }
+
+    /**
+     * @return the _strThumbnail
+     */
+    public String getThumbnail( )
+    {
+        return _strThumbnail;
+    }
+
+    /**
+     * @param _strThumbnail the _strThumbnail to set
+     */
+    public void setThumbnail( String _strThumbnail )
+    {
+        this._strThumbnail = _strThumbnail;
     }
 }

@@ -138,6 +138,8 @@ public class MyDashboardComponentRating extends MyDashboardComponent
                     ratingResource.setTypeResource( Document.PROPERTY_RESOURCE_TYPE );
                     ratingResource.setCanDelete( _ratingSecurityService.canDeleteVote( request, "" + doc.getId( ),
                             Document.PROPERTY_RESOURCE_TYPE ) );
+                    ratingResource.setSummary( doc.getSummary( ) );
+                    ratingResource.setThumbnail( doc.getThumbnail( ) );
 
                     // Get total score of a rating
                     Rating rating = _ratingService.findByResource( "" + doc.getId( ), Document.PROPERTY_RESOURCE_TYPE );

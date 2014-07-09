@@ -7,9 +7,12 @@
 <br />
 <div class="row">
 	<#list list_resource_dto as resource>
-		<div class="col-sm-6 col-md-3" >
+		<div class="col-md-3" >
     		<div class="thumbnail">
 	      		<div class="caption">
+	      			<div class="thumbnail">
+				      <img src="${resource.thumbnail}" alt="${resource.title}">
+				    </div>
 	        		<b>${resource.title}</b>
 	        		<#if resource.canDelete>
 	        		<div class="cancel pull-right">
@@ -18,8 +21,13 @@
 	        			</a>
 	        		</div>
 	        		</#if>
-	        		<br />
-	        		<span>${resource.vote} vote(s) / ${resource.note} point(s) </span>
+	        		<hr />
+	        		<#if resource.summary?length &gt; 100 >
+	        		<div class="dashboard_summary">${resource.summary?substring(0, 100)} [...] </div>
+	        		<#else>
+	        		<div class="dashboard_summary">${resource.summary} </div>
+	        		</#if>
+	        		<span><b>${resource.vote} vote(s) <br/> ${resource.note} point(s) </b></span>
 				</div>
 			</div>
 		</div>
