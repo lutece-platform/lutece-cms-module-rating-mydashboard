@@ -17,7 +17,9 @@
 					<div class="thumbnail">
 						<img src="document?id={doc-id}" /> 
 					</div>
+					<div style="height:30px;">
 					<b> <xsl:value-of select="doc-title" /> </b>
+					</div>
 					<br />
 					<xsl:value-of select="doc-rate" /> votes
 					<hr />

@@ -43,8 +43,4 @@ import fr.paris.lutece.portal.util.mvc.xpage.annotations.Controller;
 @Controller( xpageName = "rating-mydashboard" )
 public class RatingMyDashboardApp extends MVCApplication
 {
-    private static final String PARAMETER_REFERER = "referer";
-    private static final String JSP_URL_MYDASHBOARD_XPAGE = "jsp/site/Portal.jsp?page=mydashboard";
-
-    private static final String PATH_PORTAL = "jsp/site/";
 }
