@@ -48,14 +48,16 @@ import fr.paris.lutece.plugins.extend.modules.rating.service.security.IRatingSec
 import fr.paris.lutece.plugins.extend.service.extender.IResourceExtenderService;
 import fr.paris.lutece.plugins.extend.service.extender.history.IResourceExtenderHistoryService;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
-import fr.paris.lutece.plugins.rating.modules.mydashboard.business.RatingResource;
+import fr.paris.lutece.portal.business.stylesheet.StyleSheet;
+import fr.paris.lutece.portal.business.stylesheet.StyleSheetHome;
+import fr.paris.lutece.portal.service.html.XmlTransformerService;
 import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.security.LuteceUser;
 import fr.paris.lutece.portal.service.security.SecurityService;
 import fr.paris.lutece.portal.service.template.AppTemplateService;
 import fr.paris.lutece.util.html.HtmlTemplate;
+import fr.paris.lutece.util.xml.XmlUtil;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -65,6 +67,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 
 
@@ -82,6 +85,16 @@ public class MyDashboardComponentRating extends MyDashboardComponent
     private static final String MARK_NB_VOTES_USER = "nb_votes_user";
 
     private static final String TEMPLATE_DASHBOARD_RATING = "skin/plugins/rating/modules/mydashboard/dashboardcomponent/dashboardComponentRating.html";
+    private static final String XML_TAG_LIST_DOCUMENT = "list-document";
+    private static final String XML_TAG_DOCUMENT = "document-content";
+    private static final String XML_NB_VOTE = "nb-vote";
+    private static final String XML_NB_MAX_VOTE = "nb-max-vote";
+    private static final String XML_DOC_ID = "doc-id";
+    private static final String XML_DOC_RATE = "doc-rate";
+    private static final String XML_DOC_TITLE = "doc-title";
+    private static final String XML_DOC_SUMMARY = "doc-summary";
+    private static final String XML_DOC_CANCEL_VOTE = "doc-cancel-vote";
+    private static final String XML_DOC = "doc";
 
     @Inject
     private IResourceExtenderService _resourceExtenderService;
@@ -115,7 +128,6 @@ public class MyDashboardComponentRating extends MyDashboardComponent
                 historyFilter.setExtendableResourceType( Document.PROPERTY_RESOURCE_TYPE );
                 historyFilter.setExtenderType( RatingResourceExtender.RESOURCE_EXTENDER );
                 List<ResourceExtenderHistory> histories = _resourceExtenderHistoryService.findByFilter( historyFilter );
-                List<RatingResource> ratedDocument = new ArrayList<RatingResource>( histories.size( ) );
 
                 List<ResourceExtenderDTO> extenders = _resourceExtenderService.findByFilter( filter );
 
@@ -128,28 +140,53 @@ public class MyDashboardComponentRating extends MyDashboardComponent
 
                 model.put( MARK_NB_VOTES_USER, histories.size( ) );
 
-                for ( ResourceExtenderHistory history : histories )
+                String htmlCode = StringUtils.EMPTY;
+
+                if ( histories.size( ) > 0 )
                 {
-                    Document doc = DocumentHome.findByPrimaryKey( Integer.valueOf( ""
-                            + history.getIdExtendableResource( ) ) );
-                    RatingResource ratingResource = new RatingResource( );
-                    ratingResource.setIdResource( Long.valueOf( doc.getId( ) ) );
-                    ratingResource.setTitle( doc.getTitle( ) );
-                    ratingResource.setTypeResource( Document.PROPERTY_RESOURCE_TYPE );
-                    ratingResource.setCanDelete( _ratingSecurityService.canDeleteVote( request, "" + doc.getId( ),
-                            Document.PROPERTY_RESOURCE_TYPE ) );
-                    ratingResource.setSummary( doc.getSummary( ) );
-                    ratingResource.setThumbnail( doc.getThumbnail( ) );
 
-                    // Get total score of a rating
-                    Rating rating = _ratingService.findByResource( "" + doc.getId( ), Document.PROPERTY_RESOURCE_TYPE );
-                    ratingResource.setNote( "" + rating.getScoreValue( ) );
-                    ratingResource.setVote( "" + rating.getVoteCount( ) );
+                    XmlTransformerService xmlTransformerService = new XmlTransformerService( );
+                    StringBuffer strXml = new StringBuffer( );
+                    XmlUtil.beginElement( strXml, XML_TAG_LIST_DOCUMENT );
+                    if ( model.get( MARK_NB_VOTES ) != null )
+                    {
+                        XmlUtil.addElement( strXml, XML_NB_MAX_VOTE, (Integer) model.get( MARK_NB_VOTES ) );
+                    }
+                    XmlUtil.addElement( strXml, XML_NB_VOTE, histories.size( ) );
 
-                    ratedDocument.add( ratingResource );
+                    for ( ResourceExtenderHistory history : histories )
+                    {
+                        XmlUtil.beginElement( strXml, XML_TAG_DOCUMENT );
+                        Document doc = DocumentHome.findByPrimaryKeyWithoutBinaries( Integer.valueOf( ""
+                                + history.getIdExtendableResource( ) ) );
+
+                        // Get total score of a rating
+                        Rating rating = _ratingService.findByResource( "" + doc.getId( ),
+                                Document.PROPERTY_RESOURCE_TYPE );
+
+                        XmlUtil.addElement( strXml, XML_DOC_ID, doc.getId( ) );
+                        XmlUtil.addElement( strXml, XML_DOC_SUMMARY, doc.getSummary( ) );
+                        XmlUtil.addElement( strXml, XML_DOC_TITLE, doc.getTitle( ) );
+                        XmlUtil.addElement( strXml, XML_DOC_RATE, rating.getScoreValue( ) );
+                        XmlUtil.addElement(
+                                strXml,
+                                XML_DOC_CANCEL_VOTE,
+                                BooleanUtils.toStringTrueFalse( _ratingSecurityService.canDeleteVote( request,
+                                        "" + doc.getId( ), Document.PROPERTY_RESOURCE_TYPE ) ) );
+                        XmlUtil.addElement( strXml, XML_DOC, doc.getXmlValidatedContent( ) );
+                        XmlUtil.endElement( strXml, XML_TAG_DOCUMENT );
+                    }
+
+                    XmlUtil.endElement( strXml, XML_TAG_LIST_DOCUMENT );
+                    StyleSheet stylesheet = StyleSheetHome.findByPrimaryKey( 10001 );
+
+                    htmlCode = xmlTransformerService.transformBySourceWithXslCache( strXml.toString( ), stylesheet,
+                            null );
+
                 }
 
-                model.put( MARK_LIST_RESOURCE_DTO, ratedDocument );
+                model.put( MARK_LIST_RESOURCE_DTO, htmlCode );
+
                 HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_DASHBOARD_RATING,
                         request.getLocale( ), model );
 
